@@ -45,16 +45,16 @@ while iteraciones < max_iter:
     tabu_list.append(solucion)
     j = 0
     while j < tabu_len:
-        min_index = np.argmin(costos_sol)
-        if vecindad[min_index] not in tabu_list:
-            solucion = vecindad[min_index]
-            if costos_sol[min_index] < z:
+        index = np.random.randint(0,len(vecindad)-1)
+        if vecindad[index] not in tabu_list:
+            solucion = vecindad[index]
+            if costos_sol[index] < z:
                 sol_final = solucion[:]
-                z = costos_sol[min_index]
+                z = costos_sol[index]
             break
         else:
-            vecindad.remove(vecindad[min_index])
-            costos_sol.remove(costos_sol[min_index])
+            vecindad.remove(vecindad[index])
+            costos_sol.remove(costos_sol[index])
             j = j + 1
     if j == tabu_len:
         break
@@ -62,5 +62,5 @@ while iteraciones < max_iter:
         # actualizar tabu list
         tabu_list = tabu_list[1:]
     iteraciones = iteraciones + 1
-print(z, sol_final)
+print(iteraciones, z, sol_final)
 print(datetime.datetime.now())
