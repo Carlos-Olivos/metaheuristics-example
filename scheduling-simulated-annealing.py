@@ -38,7 +38,6 @@ def update_temp(t, r):
 
     return temp
 
-
 def swap_tasks(solucion):
     vecindad = []
     for i in range(len(solucion) - 1):
@@ -47,36 +46,61 @@ def swap_tasks(solucion):
         vecindad.append(vm)
 
     return vecindad
-
-
+np.random.seed(0)
 iteraciones = 0
-max_iter = 10
-temp_iter = 3
+max_iter = 50
+max_iter_temp = 3
+temp_iter = 0
 solucion = [i for i in range(len(df))]
 f0 = cost(solucion, df)
 temp = f0 * np.random.random(1)
-sol_final = []
+sol_final = solucion
 z = f0
+len_vecindad = 2
 while iteraciones < max_iter:
+
     vecindad = []
-    vecindad = swap_tasks(solucion)
+    for i in range(len(solucion) - 1):
+        vm = solucion[:]
+        vm[i], vm[i + 1] = swap(solucion[i], solucion[i + 1])
+        vecindad.append(vm)
 
     # costos vecindad
+    costos_sol = []
+    for i in vecindad:
+        costos_sol.append(cost(i, df))
+
     random = np.random.random(1)
-    index = int(np.round(random * (len(vecindad) - 1)))
-    costos_sol = cost(vecindad[index], df)
+    index = int(np.round(random * (len(vecindad) - 1))) #eleccion en vecindad
 
-    prob = prob_accept(f0, costos_sol, temp)
-    solucion = vecindad[index]
+    costos_ev = cost(vecindad[index], df)
+    prob = prob_accept(f0, costos_ev, temp)
 
-    if costos_sol < z:
-        z = costos_sol
-        sol_final = solucion
-    elif random < prob:
-        temp_iter = temp_iter + 1
-        f0 = costos_sol
+    j = 0
+    while j < len_vecindad:
+        if costos_ev < z:
+            z = costos_ev
+            solucion = vecindad[index]
+            sol_final = solucion
 
-    if temp_iter < max_iter:
+        if random < prob:
+            temp_iter = temp_iter + 1
+            solucion = vecindad[index]
+            f0 = costos_ev
+            break
+        else:
+            vecindad.remove(vecindad[index])
+            costos_sol.remove(costos_sol[index])
+            j = j + 1
+            random = np.random.random(1)
+            index = int(np.round(random * (len(vecindad) - 1)))  # eleccion en vecindad
+            costos_ev = cost(vecindad[index], df)
+            prob = prob_accept(f0, costos_ev, temp)
+
+    if j == len_vecindad:
+        break
+
+    if temp_iter >= max_iter_temp:
         temp = update_temp(random, temp)
         temp_iter = 0
     iteraciones = iteraciones + 1
